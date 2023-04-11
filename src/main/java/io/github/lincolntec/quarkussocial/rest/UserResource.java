@@ -3,14 +3,18 @@ package io.github.lincolntec.quarkussocial.rest;
 import io.github.lincolntec.quarkussocial.domain.model.User;
 import io.github.lincolntec.quarkussocial.domain.repository.UserRepository;
 import io.github.lincolntec.quarkussocial.rest.dto.CreateUserRequest;
+import io.github.lincolntec.quarkussocial.rest.dto.ResponseError;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Set;
 
 
 @Path("/users")
@@ -19,17 +23,26 @@ import javax.ws.rs.core.Response;
 public class UserResource {
 
     private UserRepository repository;
+    private Validator validator;
 
     @Inject
-    public UserResource(UserRepository repository){
+    public UserResource(UserRepository repository, Validator validator){
 
         this.repository = repository;
+        this.validator = validator;
     }
 
 
     @POST
     @Transactional
     public Response createUser( CreateUserRequest userRequest) {
+
+        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(userRequest);
+
+        if(! violations.isEmpty()){
+            ResponseError responseError = ResponseError.createFromValidation(violations);
+            return Response.status(400).entity(responseError).build();
+        }
 
         User user = new User();
         user.setName(userRequest.getName());
