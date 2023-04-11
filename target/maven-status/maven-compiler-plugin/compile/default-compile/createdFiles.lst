@@ -1,0 +1,5 @@
+io/github/lincolntec/quarkussocial/domain/model/User.class
+io/github/lincolntec/quarkussocial/rest/dto/CreateUserRequest.class
+io/github/lincolntec/quarkussocial/rest/UserResource.class
+io/github/lincolntec/GreetingResource.class
+META-INF/panache-archive.marker
